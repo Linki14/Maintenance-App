@@ -128,7 +128,7 @@ def score_CI9(io, t):
     if t <= -15: return 2
     return 1
 
-# ✅ II scoring (MISSING BEFORE)
+# II scoring (MISSING BEFORE)
 def score_II11(n):
     return 5 if n <= 1 else 4 if n == 2 else 3 if n == 3 else 2 if n == 4 else 1
 
@@ -191,6 +191,50 @@ def calculate(df, ci_weights=None, ii_weights=None):
         df["II_norm"] = df["II"]/(5*sum(ii_weights.values()))
 
     return df
+
+# ------------------------------------------
+    # CRITICALITY CLASSIFICATION
+    # ------------------------------------------
+    CI_LOW_MAX = II_LOW_MAX = 0.4666
+    CI_MID_MAX = II_MID_MAX = 0.7332
+
+    def assign_level(v, l, m):
+        return 0 if v < l else 1 if v < m else 2
+
+    df["CI_level"] = df["CI_norm"].apply(lambda x: assign_level(x, CI_LOW_MAX, CI_MID_MAX))
+    df["II_level"] = df["II_norm"].apply(lambda x: assign_level(x, II_LOW_MAX, II_MID_MAX))
+
+    matrix = {
+        (2,2):5,(2,1):4,(2,0):3,
+        (1,2):4,(1,1):3,(1,0):2,
+        (0,2):3,(0,1):2,(0,0):1
+    }
+
+    df["Criticality_Score"] = df.apply(
+        lambda r: matrix[(r.CI_level, r.II_level)], axis=1
+    )
+
+    # ------------------------------------------
+    # RANKING CALCULATION
+    # ------------------------------------------
+    df["OR_Euclidean"] = np.sqrt(
+        (df["CI_norm"] - 0.2) ** 2 +
+        (df["II_norm"] - 0.2) ** 2
+    )
+
+    df["OR_CIxII"] = df["CI_norm"] * df["II_norm"]
+
+    df["Rank_Euclidean"] = (
+        df["OR_Euclidean"]
+        .rank(ascending=False, method="min")
+        .astype(int)
+    )
+
+    df["Rank_CIxII"] = (
+        df["OR_CIxII"]
+        .rank(ascending=False, method="min")
+        .astype(int)
+    )
 
 # --------------------------------------------------
 # SAFE PLOT (NO CRASH)
