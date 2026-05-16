@@ -52,6 +52,16 @@ if ci_use == "Yes":
         "CI9": st.number_input("CI9 – Minimum temperature", value=1.0),
     }
 
+# ✅ CHECK FOR PERCENTAGES
+if ci_mode == "1":
+    total_ci = sum(ci_weights.values())
+
+    if total_ci > 100:
+        st.error("Condition Index weights exceed 100%")
+
+    elif total_ci < 100:
+        st.warning(f"Condition Index weights sum to {total_ci}%, not 100%")
+
 # -------------------------
 # II WEIGHTING
 # -------------------------
@@ -82,6 +92,16 @@ if ii_use == "Yes":
         "II15": st.number_input("II15 – Customer impact", value=1.0),
         "II16": st.number_input("II16 – Priority customers", value=1.0),
     }
+
+# ✅ CHECK FOR PERCENTAGES
+if ii_mode == "1":
+    total_ii = sum(ii_weights.values())
+
+    if total_ii > 100:
+        st.error("Importance Index weights exceed 100%")
+
+    elif total_ii < 100:
+        st.warning(f"Importance Index weights sum to {total_ii}%, not 100%")
 
 # --------------------------------------------------
 # SCORING
