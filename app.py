@@ -74,4 +74,3 @@ if uploaded_file:
             data=csv,
             file_name="results.csv"
         )
-``
