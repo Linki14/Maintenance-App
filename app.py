@@ -145,17 +145,21 @@ def calculate_all(df):
 def plot_map(df):
     fig, ax = plt.subplots(figsize=(6,6))
 
-    matrix = np.array([
-        [1,2,3],
-        [2,3,4],
-        [3,4,5]
-    ])
+matrix = np.array([matrix [0,1,2],
+    [3,4,5],
+    [6,7,8]
+])
 
-    colors = [
-        "#33CC33","#BEF01C","#FFFF00",
-        "#BEF01C","#FFFF00","#FF9900",
-        "#FFFF00","#FF9900","#FA0000"
-    ]
+colors = [
+    "#33CC33", "#BEF01C", "#FFF000",
+    "#BEF01C", "#FFF000", "#FF9900",
+    "#FFF000", "#FF9900", "#FA0000"
+]
+
+cmap = ListedColormap(colors)
+
+ax.imshow(matrix, cmap=cmap, extent=[0.2,1,0.2,1], origin="lower")
+
 
     cmap = ListedColormap(colors)
 
