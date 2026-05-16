@@ -225,29 +225,28 @@ def calculate(df, ci_weights=None, ii_weights=None):
     )
 
 # -------------------------
-# RANKING
+# RANKING (OPPDATERT)
 # -------------------------
-    df["OR_Euclidean"] = np.sqrt(
+    df["OR1"] = np.sqrt(
         (df["CI_norm"] - 0.2)**2 +
         (df["II_norm"] - 0.2)**2
     )
 
-    df["OR_CIxII"] = df["CI_norm"] * df["II_norm"]
+    df["OR2"] = df["CI_norm"] * df["II_norm"]
 
-    df["Rank_Euclidean"] = (
-        df["OR_Euclidean"]
+    df["Rank_OR1"] = (
+        df["OR1"]
         .rank(ascending=False, method="min")
         .astype(int)
     )
 
-    df["Rank_CIxII"] = (
-        df["OR_CIxII"]
+    df["Rank_OR2"] = (
+        df["OR2"]
         .rank(ascending=False, method="min")
         .astype(int)
     )
 
     return df
-    
 # --------------------------------------------------
 # SAFE PLOT 
 # --------------------------------------------------
@@ -463,8 +462,8 @@ if mode == "Evaluate ONE circuit breaker":
             .format({
                 "CI_norm": "{:.2f}",
                 "II_norm": "{:.2f}",
-                "OR1": "{:.2f}",
-                "OR2": "{:.2f}"
+                "OR_Euclidean": "{:.2f}",
+                "OR_CIxII": "{:.2f}"
             })
         )
 
@@ -579,8 +578,8 @@ if mode == "Evaluate SEVERAL circuit breakers":
                 .format({
                     "CI_norm": "{:.2f}",
                     "II_norm": "{:.2f}",
-                    "OR1": "{:.2f}",
-                    "OR2": "{:.2f}"
+                    "OR_Euclidean": "{:.2f}",
+                    "OR_CIxII": "{:.2f}"
                 })
             )
 
