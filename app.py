@@ -579,8 +579,8 @@ if mode == "Evaluate SEVERAL circuit breakers":
                 .format({
                     "CI_norm": "{:.2f}",
                     "II_norm": "{:.2f}",
-                    "OR_Euclidean": "{:.2f}",
-                    "OR_CIxII": "{:.2f}"
+                    "OR1": "{:.2f}",
+                    "OR2": "{:.2f}"
                 })
             )
 
