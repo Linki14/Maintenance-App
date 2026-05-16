@@ -343,10 +343,17 @@ if mode == "Evaluate ONE circuit breaker":
         df = pd.DataFrame([data])
         df = calculate(df, ci_weights, ii_weights)
 
-        st.dataframe(df)
-        fig = plot_map(df)fig = plot_map(df:
-    st.pyplot(fig)
+    if st.button("Run Analysis"):
 
+        df = pd.DataFrame([data])
+        df = calculate(df, ci_weights, ii_weights)
+
+        st.dataframe(df)
+
+        fig = plot_map(df)
+        if fig:
+            st.pyplot(fig)
+``
 
 # --------------------------------------------------
 # BREAKERS (EXCEL)
