@@ -15,21 +15,73 @@ mode = st.radio(
 )
 
 # --------------------------------------------------
-# WEIGHTING OPTIONS
+# WEIGHTING OPTIONS (UPDATED - SAME AS ORIGINAL)
 # --------------------------------------------------
 st.subheader("Weighting")
 
-ci_mode = st.radio("Condition Index weighting", ["Equal", "Custom"])
+# -------------------------
+# CI WEIGHTING
+# -------------------------
 ci_weights = None
 
-if ci_mode == "Custom":
-    ci_weights = {f"CI{i}": st.number_input(f"CI{i}", 0.0, 10.0, 1.0) for i in range(1,10)}
+st.write("Do you want to apply custom weighting to the Condition Index?")
+ci_use = st.radio("Condition Index weighting", ["No", "Yes"])
 
-ii_mode = st.radio("Importance Index weighting", ["Equal", "Custom"])
+if ci_use == "Yes":
+
+    st.write("How do you want to specify weights?")
+    st.write("1 – Percentages (e.g. 50)")
+    st.write("2 – Relative parts (e.g. 2 = twice as important)")
+
+    ci_mode = st.radio("Choose 1 or 2:", ["1", "2"])
+
+    st.write(
+        "Enter weights for EACH Condition Index sub‑component:\n"
+        "(Higher number = higher importance relative to others)"
+    )
+
+    ci_weights = {
+        "CI1": st.number_input("CI1 – Age relative to lifetime", value=1.0),
+        "CI2": st.number_input("CI2 – Number of operations", value=1.0),
+        "CI3": st.number_input("CI3 – Condition assessment interval", value=1.0),
+        "CI4": st.number_input("CI4 – Revision interval", value=1.0),
+        "CI5": st.number_input("CI5 – Time since last operation", value=1.0),
+        "CI6": st.number_input("CI6 – Specialist requirement", value=1.0),
+        "CI7": st.number_input("CI7 – Outdated equipment", value=1.0),
+        "CI8": st.number_input("CI8 – Distance to coastline", value=1.0),
+        "CI9": st.number_input("CI9 – Minimum temperature", value=1.0),
+    }
+
+# -------------------------
+# II WEIGHTING
+# -------------------------
 ii_weights = None
 
-if ii_mode == "Custom":
-    ii_weights = {f"II{i}": st.number_input(f"II{i}", 0.0, 10.0, 1.0) for i in range(10,17)}
+st.write("Do you want to apply custom weighting to the Importance Index?")
+ii_use = st.radio("Importance Index weighting", ["No", "Yes"])
+
+if ii_use == "Yes":
+
+    st.write("How do you want to specify weights?")
+    st.write("1 – Percentages (e.g. 50)")
+    st.write("2 – Relative parts (e.g. 2 = twice as important)")
+
+    ii_mode = st.radio("Choose II weighting:", ["1", "2"])
+
+    st.write(
+        "Enter weights for each II sub-index:\n"
+        "(Higher number = higher importance relative to others)"
+    )
+
+    ii_weights = {
+        "II10": st.number_input("II10 – Breaker function", value=1.0),
+        "II11": st.number_input("II11 – Grid topology", value=1.0),
+        "II12": st.number_input("II12 – Busbar arrangement", value=1.0),
+        "II13": st.number_input("II13 – Redundancy", value=1.0),
+        "II14": st.number_input("II14 – KILE cost", value=1.0),
+        "II15": st.number_input("II15 – Customer impact", value=1.0),
+        "II16": st.number_input("II16 – Priority customers", value=1.0),
+    }
 
 # --------------------------------------------------
 # SCORING
