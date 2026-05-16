@@ -499,12 +499,14 @@ if mode == "Evaluate SEVERAL circuit breakers":
     # ---- TEMPLATE DOWNLOAD ----
     template_df = pd.DataFrame(columns=INPUT_COLUMNS)
 
+    
     st.download_button(
         "Download Excel template",
-        template_df.to_csv(index=False, sep=";")
+        template_df.to_csv(index=False, sep=";"),
         file_name="breaker_template.csv",
         mime="text/csv"
     )
+
 
     # ---- UPLOAD ----
     uploaded_file = st.file_uploader("Upload completed file", type=["csv","xlsx"])
