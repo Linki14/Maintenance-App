@@ -459,5 +459,5 @@ if mode == "Evaluate SEVERAL circuit breakers":
 
             fig = plot_map(df)
             if fig:
-                st.pyplot(fig)",
+                st.pyplot(fig)"
 
