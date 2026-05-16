@@ -495,11 +495,35 @@ if mode == "Evaluate SEVERAL circuit breakers":
         else:
             df = pd.read_excel(uploaded_file)
 
+        # ✅ FIX: ensure required columns exist
+        required_columns = [
+            "Feeder_critical_customer",
+            "Transformer_critical_customer",
+            "Number_of_transformers"
+        ]
+
+        for col in required_columns:
+            if col not in df.columns:
+                df[col] = 0
+
+        # ✅ FIX: clean values
+        df["Feeder_critical_customer"] = df["Feeder_critical_customer"].fillna("No")
+        df["Transformer_critical_customer"] = df["Transformer_critical_customer"].fillna("No")
+
+        df["Number_of_transformers"] = pd.to_numeric(
+            df["Number_of_transformers"], errors="coerce"
+        ).fillna(0)
+
+        # ✅ Optional warning if columns missing
+        missing = set(INPUT_COLUMNS) - set(df.columns)
+        if missing:
+            st.warning(f"Missing columns in file: {missing}")
+
         if st.button("Run Analysis (Multiple)", key="multi_run"):
 
             df = calculate(df, ci_weights, ii_weights)
 
-            # ---- SAME COLOR LOGIC ✅ ----
+            # ---- COLOR + FORMAT ----
             color_columns = [
                 "CI1","CI2","CI3","CI4","CI5","CI6","CI7","CI8","CI9",
                 "II10","II11","II12","II13","II14","II15","II16",
@@ -524,4 +548,3 @@ if mode == "Evaluate SEVERAL circuit breakers":
             fig = plot_map(df)
             if fig:
                 st.pyplot(fig)
-
