@@ -227,10 +227,12 @@ def calculate(df, ci_weights=None, ii_weights=None):
 # -------------------------
 # RANKING (OPPDATERT)
 # -------------------------
+    
     df["OR1"] = np.sqrt(
         (df["CI_norm"] - 0.2)**2 +
-        (df["II_norm"] - 0.2)**2
-    )
+        (df["II_norm"] = (df["CI_norm"] * df["II_norm"]).round(2)    (df["II_norm"] - 0.2)**2
+    ).round(2)
+
 
     df["OR2"] = df["CI_norm"] * df["II_norm"]
 
