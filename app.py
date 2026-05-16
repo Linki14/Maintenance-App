@@ -364,7 +364,7 @@ if mode == "Evaluate ONE circuit breaker":
         df = calculate(df, ci_weights, ii_weights)
 
         # --------------------------------------------------
-        # COLORED OUTPUT (CORRECT PLACEMENT)
+        # COLORED + FORMATTED OUTPUT ✅
         # --------------------------------------------------
         color_columns = [
             "CI1","CI2","CI3","CI4","CI5","CI6","CI7","CI8","CI9",
@@ -374,7 +374,16 @@ if mode == "Evaluate ONE circuit breaker":
 
         valid_cols = [col for col in color_columns if col in df.columns]
 
-        styled_df = df.style.map(color_cells, subset=valid_cols)
+        styled_df = (
+            df.style
+            .map(color_cells, subset=valid_cols)
+            .format({
+                "CI_norm": "{:.2f}",
+                "II_norm": "{:.2f}",
+                "OR_Euclidean": "{:.2f}",
+                "OR_CIxII": "{:.2f}"
+            })
+        )
 
         st.dataframe(styled_df)
 
