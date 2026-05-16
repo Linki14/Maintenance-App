@@ -53,7 +53,7 @@ if ci_use == "Yes":
     }
 
 
-    # ✅ HER SKAL CHECKEN VÆRE (INNE I BLOKKEN)
+    # HER SKAL CHECKEN VÆRE (INNE I BLOKKEN)
     if ci_mode == "1":
         total_ci = sum(ci_weights.values())
 
@@ -93,16 +93,16 @@ if ii_use == "Yes":
         "II16": st.number_input("II16 – Priority customers", value=1.0),
     }
 
-# ✅ CHECK FOR PERCENTAGES
-if ii_mode == "1":
-    total_ii = sum(ii_weights.values())
+    # ✅ PERCENTAGE CHECK (FLYTTET INN HER)
+    if ii_mode == "1":
+        total_ii = sum(ii_weights.values())
 
-    if total_ii > 100:
-        st.error("Importance Index weights exceed 100%")
+        if total_ii > 100:
+            st.error("Importance Index weights exceed 100%")
 
-    elif total_ii < 100:
-        st.warning(f"Importance Index weights sum to {total_ii}%, not 100%")
-
+        elif total_ii < 100:
+            st.warning(f"Importance Index weights sum to {total_ii}%, not 100%")
+            
 # --------------------------------------------------
 # SCORING
 # --------------------------------------------------
