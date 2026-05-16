@@ -234,13 +234,13 @@ def calculate(df, ci_weights=None, ii_weights=None):
 
     df["OR_CIxII"] = df["CI_norm"] * df["II_norm"]
 
-    df["Rank_Euclidean"] = (
-        df["OR_Euclidean"]
-        .rank(ascending=False, method="min")
-        .astype(int)
+    df["OR1"] = (
+    df["OR_Euclidean"]
+    .rank(ascending=False, method="min")
+    .astype(int)
     )
 
-    df["Rank_CIxII"] = (
+    df["OR2"] = (
         df["OR_CIxII"]
         .rank(ascending=False, method="min")
         .astype(int)
