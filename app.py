@@ -390,3 +390,53 @@ if mode == "Evaluate ONE circuit breaker":
         fig = plot_map(df)
         if fig:
             st.pyplot(fig)
+
+# --------------------------------------------------
+# MULTIPLE MODE (EXCEL WORKFLOW)
+# --------------------------------------------------
+if mode == "Evaluate SEVERAL circuit breakers":
+
+    st.subheader("Excel workflow")
+
+    INPUT_COLUMNS = [
+        "Breaker_ID","Age_years","Expected_lifetime_years","Num_operations","Max_operations",
+        "Years_since_condition_assessment","Condition_assessment_interval",
+        "Years_since_revision","Revision_interval","Years_since_last_operation",
+        "Specialist_required","Outdated_equipment","Indoor_outdoor",
+        "Distance_to_coast_km","Minimum_temperature_C",
+        "Breaker_function","Regional_connections",
+        "Busbar_arrangement","Breaker_redundancy",
+        "KILE_score_manual","Customer_impact_score_manual",
+        "Feeder_critical_customer","Transformer_critical_customer",
+        "Number_of_transformers"
+    ]
+
+    # ---- TEMPLATE DOWNLOAD ----
+    template_df = pd.DataFrame(columns=INPUT_COLUMNS)
+
+    st.download_button(
+        "Download Excel template",
+        template_df.to_csv(index=False),
+        file_name="breaker_template.csv",
+        mime="text/csv"
+    )
+
+    # ---- UPLOAD ----
+    uploaded_file = st.file_uploader("Upload completed file", type=["csv","xlsx"])
+
+    if uploaded_file:
+
+        if uploaded_file.name.endswith(".csv"):
+            df = pd.read_csv(uploaded_file)
+        else:
+            df = pd.read_excel(uploaded_file)
+
+        if st.button("Run Analysis (Multiple)", key="multi_run"):
+
+            df = calculate(df, ci_weights, ii_weights)
+
+            # ---- SAME COLOR LOGIC ✅ ----
+            color_columns = [
+                "CI1","CI2","CI3","CI4","CI5","CI6","CI7","CI8","CI9",
+                "II10","II11","II12","II13","II14","II15","II16",
+
