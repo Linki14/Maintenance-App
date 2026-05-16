@@ -265,8 +265,19 @@ def plot_map(df):
 
     cmap = ListedColormap(colors)
 
+    # ✅ bakgrunn
     ax.imshow(matrix, cmap=cmap, extent=[0.2,1,0.2,1], origin="lower")
-    ax.scatter(df["II_norm"], df["CI_norm"], color="black")
+
+    # ✅ punkter (litt større og tydeligere)
+    ax.scatter(df["II_norm"], df["CI_norm"], color="black", s=60)
+
+    # ✅ VIKTIG: lås aksene (fixer problemet ditt)
+    ax.set_xlim(0.2, 1)
+    ax.set_ylim(0.2, 1)
+
+    # ✅ valgfritt men fint
+    ax.set_xlabel("Importance Index")
+    ax.set_ylabel("Condition Index")
 
     return fig
 
