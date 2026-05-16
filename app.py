@@ -190,20 +190,20 @@ def calculate(df, ci_weights=None, ii_weights=None):
         df["CI_norm"] = df["CI"]/(5*sum(ci_weights.values()))
 
 # II (CORRECTED WITH SCORING)
-df["II10"] = df.apply(lambda r: score_II10(r.Breaker_function), axis=1)
-df["II11"] = df.apply(lambda r: score_II11(r.Regional_connections), axis=1)
-df["II12"] = df.apply(lambda r: score_II12(r.Busbar_arrangement), axis=1)
-df["II13"] = df.apply(lambda r: score_II13(r.Breaker_redundancy), axis=1)
-df["II14"] = df["KILE_score_manual"]
-df["II15"] = df["Customer_impact_score_manual"]
-df["II16"] = df.apply(
-    lambda r: score_II16(
-        r.Feeder_critical_customer,
-        r.Transformer_critical_customer,
-        r.Number_of_transformers
-    ),
-    axis=1
-)
+    df["II10"] = df.apply(lambda r: score_II10(r.Breaker_function), axis=1)
+    df["II11"] = df.apply(lambda r: score_II11(r.Regional_connections), axis=1)
+    df["II12"] = df.apply(lambda r: score_II12(r.Busbar_arrangement), axis=1)
+    df["II13"] = df.apply(lambda r: score_II13(r.Breaker_redundancy), axis=1)
+    df["II14"] = df["KILE_score_manual"]
+    df["II15"] = df["Customer_impact_score_manual"]
+    df["II16"] = df.apply(
+        lambda r: score_II16(
+            r.Feeder_critical_customer,
+            r.Transformer_critical_customer,
+            r.Number_of_transformers
+        ),
+        axis=1
+    )
 
     ii_cols = [f"II{i}" for i in range(10,17)]
 
@@ -213,8 +213,6 @@ df["II16"] = df.apply(
     else:
         df["II"] = sum(df[c]*ii_weights[c] for c in ii_cols)
         df["II_norm"] = df["II"]/(5*sum(ii_weights.values()))
-
-    return df
 
 # --------------------------------------------------
 # PLOT (EXACT ORIGINAL)
