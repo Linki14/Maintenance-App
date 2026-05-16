@@ -16,7 +16,7 @@ mode = st.radio(
 )
 
 # -------------------------
-# INPUT SCHEMA
+# INPUT COLUMNS
 # -------------------------
 INPUT_COLUMNS = [
     "Breaker_ID","Age_years","Expected_lifetime_years","Num_operations","Max_operations",
@@ -67,18 +67,29 @@ def score_CI9(io, t):
     if t <= -15: return 2
     return 1
 
+def assign_level(v):
+    if v < 0: return 0
+    if v < 0.4666: return 0
+    if v < 0.7332: return 1
+    return 2
+
 # -------------------------
-# CALCULATIONS
+# MAIN CALCULATION
 # -------------------------
 def calculate_all(df):
 
-    df = df.fillna(0).clip(lower=0)
+    # Clean data
+    df = df.fillna(0)
+    df = df.clip(lower=0)
+
+    # Force integers everywhere
+    df = df.apply(pd.to_numeric, errors="coerce").fillna(0).astype(int)
 
     # CI
-    df["CI1"] = df.apply(lambda r: score_interval_ratio(r.Age_years / r.Expected_lifetime_years), axis=1)
-    df["CI2"] = df.apply(lambda r: score_interval_ratio(r.Num_operations / r.Max_operations), axis=1)
-    df["CI3"] = df.apply(lambda r: score_interval_ratio(r.Years_since_condition_assessment / r.Condition_assessment_interval), axis=1)
-    df["CI4"] = df.apply(lambda r: score_interval_ratio(r.Years_since_revision / r.Revision_interval), axis=1)
+    df["CI1"] = df.apply(lambda r: score_interval_ratio(r.Age_years / max(r.Expected_lifetime_years,1)), axis=1)
+    df["CI2"] = df.apply(lambda r: score_interval_ratio(r.Num_operations / max(r.Max_operations,1)), axis=1)
+    df["CI3"] = df.apply(lambda r: score_interval_ratio(r.Years_since_condition_assessment / max(r.Condition_assessment_interval,1)), axis=1)
+    df["CI4"] = df.apply(lambda r: score_interval_ratio(r.Years_since_revision / max(r.Revision_interval,1)), axis=1)
     df["CI5"] = df["Years_since_last_operation"].apply(score_last_operation)
     df["CI6"] = df["Specialist_required"].apply(score_yes_no)
     df["CI7"] = df["Outdated_equipment"].apply(score_yes_no)
@@ -90,10 +101,10 @@ def calculate_all(df):
     df["CI_norm"] = df["CI"] / 45
 
     # II
-    df["II10"] = df["Breaker_function"].astype(str).astype(int)
+    df["II10"] = df["Breaker_function"].astype(int)
     df["II11"] = df["Regional_connections"]
-    df["II12"] = df["Busbar_arrangement"].astype(str).astype(int)
-    df["II13"] = df["Breaker_redundancy"].astype(str).astype(int)
+    df["II12"] = df["Busbar_arrangement"].astype(int)
+    df["II13"] = df["Breaker_redundancy"].astype(int)
     df["II14"] = df["KILE_score_manual"]
     df["II15"] = df["Customer_impact_score_manual"]
     df["II16"] = df["Number_of_transformers"]
@@ -102,12 +113,7 @@ def calculate_all(df):
     df["II"] = df[ii_cols].sum(axis=1)
     df["II_norm"] = df["II"] / 35
 
-    # CRITICALITY
-    def assign_level(v):
-        if v < 0.4666: return 0
-        if v < 0.7332: return 1
-        return 2
-
+    # Criticality
     df["CI_level"] = df["CI_norm"].apply(assign_level)
     df["II_level"] = df["II_norm"].apply(assign_level)
 
@@ -120,61 +126,128 @@ def calculate_all(df):
     return df
 
 # -------------------------
-# SINGLE BREAKER
+# SINGLE BREAKER MODE
 # -------------------------
 if mode == "Evaluate ONE circuit breaker":
 
-    st.subheader("Manual input")
+    st.subheader("Manual Input")
 
-    data = {}
-    for col in INPUT_COLUMNS:
-        data[col] = st.text_input(col)
+    try:
+        data = {}
 
-    if st.button("Run analysis"):
-        df = pd.DataFrame([data])
-        df = calculate_all(df)
+        data["Breaker_ID"] = st.text_input("Breaker ID")
 
-        st.dataframe(df)
+        data["Age_years"] = st.number_input("Age (years)", min_value=0, step=1)
+        data["Expected_lifetime_years"] = st.number_input("Expected lifetime (years)", min_value=1, step=1)
+
+        data["Num_operations"] = st.number_input("Number of operations", min_value=0, step=1)
+        data["Max_operations"] = st.number_input("Maximum operations", min_value=1, step=1)
+
+        data["Years_since_condition_assessment"] = st.number_input("Years since condition assessment", min_value=0, step=1)
+        data["Condition_assessment_interval"] = st.number_input("Condition interval", min_value=1, step=1)
+
+        data["Years_since_revision"] = st.number_input("Years since revision", min_value=0, step=1)
+        data["Revision_interval"] = st.number_input("Revision interval", min_value=1, step=1)
+
+        data["Years_since_last_operation"] = st.number_input("Years since last operation", min_value=0, step=1)
+
+        data["Specialist_required"] = st.selectbox("External specialist required?", ["No","Yes"])
+        data["Outdated_equipment"] = st.selectbox("Outdated equipment?", ["No","Yes"])
+
+        io = st.selectbox("Indoor or Outdoor", ["Indoor","Outdoor"])
+        data["Indoor_outdoor"] = io
+
+        if io == "Outdoor":
+            data["Distance_to_coast_km"] = st.number_input("Distance to coast (km)", min_value=0, step=1)
+            data["Minimum_temperature_C"] = st.number_input("Minimum temperature °C", step=1)
+        else:
+            data["Distance_to_coast_km"] = 0
+            data["Minimum_temperature_C"] = 0
+
+        bf = st.selectbox("Breaker function", [
+            "5 - Transmission grid",
+            "4 - Transformer",
+            "3 - Power plant",
+            "2 - Regional grid",
+            "1 - Distribution grid"
+        ])
+        data["Breaker_function"] = int(bf[0])
+
+        data["Regional_connections"] = st.number_input("Regional connections", min_value=0, step=1)
+
+        bb = st.selectbox("Busbar arrangement", [
+            "5 - Single busbar",
+            "4 - Sectionaliser",
+            "3 - Transfer",
+            "2 - Double",
+            "1 - Triple"
+        ])
+        data["Busbar_arrangement"] = int(bb[0])
+
+        rd = st.selectbox("Redundancy", [
+            "5 - No redundancy",
+            "3 - Bypass",
+            "1 - Redundancy"
+        ])
+        data["Breaker_redundancy"] = int(rd[0])
+
+        data["KILE_score_manual"] = st.number_input("KILE score (1–5)", min_value=1, max_value=5, step=1)
+        data["Customer_impact_score_manual"] = st.number_input("Customer impact (1–5)", min_value=1, max_value=5, step=1)
+
+        data["Feeder_critical_customer"] = st.selectbox("Critical feeder?", ["No","Yes"])
+        data["Transformer_critical_customer"] = st.selectbox("Critical transformer?", ["No","Yes"])
+        data["Number_of_transformers"] = st.number_input("Number of transformers", min_value=0, step=1)
+
+        if st.button("Run Analysis"):
+
+            df = pd.DataFrame([data])
+            df = calculate_all(df)
+
+            st.success("Analysis complete ✅")
+            st.dataframe(df)
+
+    except:
+        st.error("Invalid input detected. Only non-negative integers allowed.")
 
 # -------------------------
-# MULTIPLE BREAKERS
+# MULTI MODE
 # -------------------------
 else:
 
-    st.subheader("Excel workflow")
+    st.subheader("Excel Workflow")
 
-    # Download template
     template = pd.DataFrame(columns=INPUT_COLUMNS)
     buffer = BytesIO()
     template.to_excel(buffer, index=False)
 
-    st.download_button(
-        "Download Excel template",
-        data=buffer.getvalue(),
-        file_name="Breaker_Input_Template.xlsx"
-    )
+    st.download_button("Download Excel template", buffer.getvalue(), file_name="Template.xlsx")
 
-    uploaded = st.file_uploader("Upload completed file", type=["xlsx"])
+    file = st.file_uploader("Upload completed file", type=["xlsx"])
 
-    if uploaded and st.button("Run analysis"):
+    if file:
+        try:
+            df = pd.read_excel(file)
 
-        df = pd.read_excel(uploaded)
+            if not all(col in df.columns for col in INPUT_COLUMNS):
+                st.error("Missing columns in Excel file.")
+            else:
 
-        df = calculate_all(df)
+                if st.button("Run Analysis"):
 
-        st.dataframe(df)
+                    df = calculate_all(df)
 
-        # Plot
-        fig, ax = plt.subplots()
-        ax.scatter(df["II_norm"], df["CI_norm"])
-        st.pyplot(fig)
+                    st.dataframe(df)
 
-        # Download results
-        out = BytesIO()
-        df.to_excel(out, index=False)
+                    # Plot
+                    fig, ax = plt.subplots()
+                    ax.scatter(df["II_norm"], df["CI_norm"])
+                    st.pyplot(fig)
 
-        st.download_button(
-            "Download results",
-            data=out.getvalue(),
-            file_name="Results.xlsx"
-        )
+                    # Download
+                    out = BytesIO()
+                    df.to_excel(out, index=False)
+
+                    st.download_button("Download results", out.getvalue(), "Results.xlsx")
+
+        except:
+            st.error("Error reading file. Ensure correct format and non-negative integers.")
