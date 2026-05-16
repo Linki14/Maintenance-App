@@ -511,8 +511,19 @@ if mode == "Evaluate SEVERAL circuit breakers":
 
     if uploaded_file:
 
+        # ✅ ROBUST CSV FIX
         if uploaded_file.name.endswith(".csv"):
-            df = pd.read_csv(uploaded_file, sep=None, engine="python")
+
+            df = pd.read_csv(uploaded_file)
+
+            # ⚠️ Hvis hele fila havner i én kolonne → splitt manuelt
+            if len(df.columns) == 1:
+                df = df.iloc[:, 0].str.replace(",", ";")
+                df = df.str.split(";", expand=True)
+
+                # gi riktige kolonnenavn
+                df.columns = INPUT_COLUMNS[:len(df.columns)]
+
         else:
             df = pd.read_excel(uploaded_file)
 
@@ -534,6 +545,19 @@ if mode == "Evaluate SEVERAL circuit breakers":
         df["Number_of_transformers"] = pd.to_numeric(
             df["Number_of_transformers"], errors="coerce"
         ).fillna(0)
+
+        # ✅ Convert numeric columns (VELDIG viktig!)
+        numeric_cols = df.columns.drop([
+            "Breaker_ID",
+            "Specialist_required",
+            "Outdated_equipment",
+            "Indoor_outdoor",
+            "Feeder_critical_customer",
+            "Transformer_critical_customer"
+        ])
+
+        for col in numeric_cols:
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
         # ✅ Optional warning if columns missing
         missing = set(INPUT_COLUMNS) - set(df.columns)
