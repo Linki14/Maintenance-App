@@ -491,7 +491,7 @@ if mode == "Evaluate SEVERAL circuit breakers":
     if uploaded_file:
 
         if uploaded_file.name.endswith(".csv"):
-            df = pd.read_csv(uploaded_file)
+            df = pd.read_csv(uploaded_file, sep=None, engine="python")
         else:
             df = pd.read_excel(uploaded_file)
 
