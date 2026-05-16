@@ -113,7 +113,8 @@ def score_yes_no(v):
     return 5 if str(v).lower() == "yes" else 1
 
 def score_CI8(io, d):
-    if io == "Indoor": return 1
+    if str(io).lower() == "indoor":
+        return 1
     if d <= 1: return 5
     if d <= 3: return 4
     if d <= 5: return 3
@@ -121,7 +122,8 @@ def score_CI8(io, d):
     return 1
 
 def score_CI9(io, t):
-    if io == "Indoor": return 1
+    if str(io).lower() == "indoor":
+        return 1
     if t <= -30: return 5
     if t <= -25: return 4
     if t <= -20: return 3
