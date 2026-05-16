@@ -219,6 +219,11 @@ def calculate(df, ci_weights=None, ii_weights=None):
 # --------------------------------------------------
 def plot_map(df):
 
+    # ✅ CHECK før plotting
+    if "II_norm" not in df.columns or "CI_norm" not in df.columns:
+        st.error("Error: CI_norm or II_norm missing. Run analysis first.")
+        return None
+
     fig, ax = plt.subplots(figsize=(6,6))
 
     matrix = np.array([[0,1,2],[3,4,5],[6,7,8]])
@@ -245,7 +250,6 @@ def plot_map(df):
     ax.set_ylim(0.2,1)
 
     return fig
-
 # --------------------------------------------------
 # SINGLE
 # --------------------------------------------------
@@ -340,7 +344,9 @@ if mode == "Evaluate ONE circuit breaker":
         df = calculate(df, ci_weights, ii_weights)
 
         st.dataframe(df)
-        st.pyplot(plot_map(df))
+        fig = plot_map(df)fig = plot_map(df:
+    st.pyplot(fig)
+
 
 # --------------------------------------------------
 # BREAKERS (EXCEL)
