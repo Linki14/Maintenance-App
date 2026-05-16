@@ -265,17 +265,27 @@ def plot_map(df):
 
     cmap = ListedColormap(colors)
 
-    # ✅ bakgrunn
+    # bakgrunn
     ax.imshow(matrix, cmap=cmap, extent=[0.2,1,0.2,1], origin="lower")
 
-    # ✅ punkter (litt større og tydeligere)
+    # punkter
     ax.scatter(df["II_norm"], df["CI_norm"], color="black", s=60)
 
-    # ✅ VIKTIG: lås aksene (fixer problemet ditt)
+    # ✅ LEGG TIL DETTE (viser navn)
+    for _, r in df.iterrows():
+        ax.text(
+            r["II_norm"],
+            r["CI_norm"],
+            str(r["Breaker_ID"]),
+            fontsize=8,
+            ha="center",
+            va="bottom"
+        )
+
+    # lås akser
     ax.set_xlim(0.2, 1)
     ax.set_ylim(0.2, 1)
 
-    # ✅ valgfritt men fint
     ax.set_xlabel("Importance Index")
     ax.set_ylabel("Condition Index")
 
