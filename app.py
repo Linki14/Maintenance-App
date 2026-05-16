@@ -363,20 +363,20 @@ if mode == "Evaluate ONE circuit breaker":
         df = pd.DataFrame([data])
         df = calculate(df, ci_weights, ii_weights)
 
-# --------------------------------------------------
-# COLORED OUTPUT (ADDED)
-# --------------------------------------------------
-color_columns = [
-    "CI1","CI2","CI3","CI4","CI5","CI6","CI7","CI8","CI9",
-    "II10","II11","II12","II13","II14","II15","II16",
-    "Criticality_Score"
-]
+        # --------------------------------------------------
+        # COLORED OUTPUT (CORRECT PLACEMENT)
+        # --------------------------------------------------
+        color_columns = [
+            "CI1","CI2","CI3","CI4","CI5","CI6","CI7","CI8","CI9",
+            "II10","II11","II12","II13","II14","II15","II16",
+            "Criticality_Score"
+        ]
 
-valid_cols = [col for col in color_columns if col in df.columns]
+        valid_cols = [col for col in color_columns if col in df.columns]
 
-styled_df = df.style.map(color_cells, subset=valid_cols)
+        styled_df = df.style.map(color_cells, subset=valid_cols)
 
-st.dataframe(styled_df)
+        st.dataframe(styled_df)
 
         fig = plot_map(df)
         if fig:
