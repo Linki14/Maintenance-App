@@ -52,15 +52,15 @@ if ci_use == "Yes":
         "CI9": st.number_input("CI9 – Minimum temperature", value=1.0),
     }
 
-# ✅ CHECK FOR PERCENTAGES
-if ci_mode == "1":
-    total_ci = sum(ci_weights.values())
 
-    if total_ci > 100:
-        st.error("Condition Index weights exceed 100%")
+    # ✅ HER SKAL CHECKEN VÆRE (INNE I BLOKKEN)
+    if ci_mode == "1":
+        total_ci = sum(ci_weights.values())
 
-    elif total_ci < 100:
-        st.warning(f"Condition Index weights sum to {total_ci}%, not 100%")
+        if total_ci > 100:
+            st.error("Condition Index weights exceed 100%")
+        elif total_ci < 100:
+            st.warning(f"Condition Index weights sum to {total_ci}%, not 100%")
 
 # -------------------------
 # II WEIGHTING
