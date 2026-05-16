@@ -140,13 +140,15 @@ def score_II16(f, t, n):
     return 1
 
 # --------------------------------------------------
-# CALCULATION (WITH FIXES)
+# CALCULATION (CORRECT VERSION)
 # --------------------------------------------------
 def calculate(df, ci_weights=None, ii_weights=None):
 
     df = df.copy()
 
-    # CI
+    # -------------------------
+    # CI CALCULATION
+    # -------------------------
     df["CI1"] = (df["Age_years"]/df["Expected_lifetime_years"]).apply(score_interval_ratio)
     df["CI2"] = (df["Num_operations"]/df["Max_operations"]).apply(score_interval_ratio)
     df["CI3"] = (df["Years_since_condition_assessment"]/df["Condition_assessment_interval"]).apply(score_interval_ratio)
@@ -166,7 +168,9 @@ def calculate(df, ci_weights=None, ii_weights=None):
         df["CI"] = sum(df[c]*ci_weights[c] for c in ci_cols)
         df["CI_norm"] = df["CI"]/(5*sum(ci_weights.values()))
 
-    # ✅ II FIXED
+    # -------------------------
+    # II CALCULATION
+    # -------------------------
     df["II10"] = df["Breaker_function"]
     df["II11"] = df["Regional_connections"].apply(score_II11)
     df["II12"] = df["Busbar_arrangement"]
@@ -190,19 +194,22 @@ def calculate(df, ci_weights=None, ii_weights=None):
         df["II"] = sum(df[c]*ii_weights[c] for c in ii_cols)
         df["II_norm"] = df["II"]/(5*sum(ii_weights.values()))
 
-    return df
+    # -------------------------
+    # CRITICALITY
+    # -------------------------
+    CI_LOW_MAX = 0.4666
+    CI_MID_MAX = 0.7332
 
-# ------------------------------------------
-    # CRITICALITY CLASSIFICATION
-    # ------------------------------------------
-    CI_LOW_MAX = II_LOW_MAX = 0.4666
-    CI_MID_MAX = II_MID_MAX = 0.7332
+    def assign_level(v):
+        if v < CI_LOW_MAX:
+            return 0
+        elif v < CI_MID_MAX:
+            return 1
+        else:
+            return 2
 
-    def assign_level(v, l, m):
-        return 0 if v < l else 1 if v < m else 2
-
-    df["CI_level"] = df["CI_norm"].apply(lambda x: assign_level(x, CI_LOW_MAX, CI_MID_MAX))
-    df["II_level"] = df["II_norm"].apply(lambda x: assign_level(x, II_LOW_MAX, II_MID_MAX))
+    df["CI_level"] = df["CI_norm"].apply(assign_level)
+    df["II_level"] = df["II_norm"].apply(assign_level)
 
     matrix = {
         (2,2):5,(2,1):4,(2,0):3,
@@ -215,12 +222,12 @@ def calculate(df, ci_weights=None, ii_weights=None):
         axis=1
     )
 
-    # ------------------------------------------
-    # RANKING CALCULATION
-    # ------------------------------------------
+    # -------------------------
+    # RANKING
+    # -------------------------
     df["OR_Euclidean"] = np.sqrt(
-        (df["CI_norm"] - 0.2) ** 2 +
-        (df["II_norm"] - 0.2) ** 2
+        (df["CI_norm"] - 0.2)**2 +
+        (df["II_norm"] - 0.2)**2
     )
 
     df["OR_CIxII"] = df["CI_norm"] * df["II_norm"]
@@ -237,32 +244,8 @@ def calculate(df, ci_weights=None, ii_weights=None):
         .astype(int)
     )
 
-    # ✅ ALLTID SIST
+    # ✅ ONLY RETURN HERE
     return df
-
-
-    # ------------------------------------------
-    # RANKING CALCULATION
-    # ------------------------------------------
-    df["OR_Euclidean"] = np.sqrt(
-        (df["CI_norm"] - 0.2) ** 2 +
-        (df["II_norm"] - 0.2) ** 2
-    )
-
-    df["OR_CIxII"] = df["CI_norm"] * df["II_norm"]
-
-    df["Rank_Euclidean"] = (
-        df["OR_Euclidean"]
-        .rank(ascending=False, method="min")
-        .astype(int)
-    )
-
-    df["Rank_CIxII"] = (
-        df["OR_CIxII"]
-        .rank(ascending=False, method="min")
-        .astype(int)
-    )
-
 # --------------------------------------------------
 # SAFE PLOT (NO CRASH)
 # --------------------------------------------------
