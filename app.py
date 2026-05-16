@@ -353,8 +353,7 @@ if mode == "Evaluate ONE circuit breaker":
         fig = plot_map(df)
         if fig:
             st.pyplot(fig)
-``
-
+            
 # --------------------------------------------------
 # BREAKERS (EXCEL)
 # --------------------------------------------------
