@@ -93,7 +93,7 @@ if ii_use == "Yes":
         "II16": st.number_input("II16 – Priority customers", value=1.0),
     }
 
-    # ✅ PERCENTAGE CHECK (FLYTTET INN HER)
+    # PERCENTAGE CHECK (FLYTTET INN HER)
     if ii_mode == "1":
         total_ii = sum(ii_weights.values())
 
@@ -257,51 +257,53 @@ if mode == "Evaluate ONE circuit breaker":
         data["Distance_to_coast_km"] = 0
         data["Minimum_temperature_C"] = 0
 
-bf = st.selectbox("Breaker function",
-    [
-        "5 - Connected to transmission grid",
-        "4 - Connected to transformer",
-        "3 - Connected to power plant",
-        "2 - Regional grid circuit breaker",
-        "1 - Distribution grid circuit breaker"
-    ]
-)
-data["Breaker_function"] = int(bf[0])
+    bf = st.selectbox(
+        "Breaker function",
+        [
+            "5 - Connected to transmission grid",
+            "4 - Connected to transformer",
+            "3 - Connected to power plant",
+            "2 - Regional grid circuit breaker",
+            "1 - Distribution grid circuit breaker"
+        ]
+    )
+    data["Breaker_function"] = int(bf[0])
 
-data["Regional_connections"] = st.number_input("Connections", 0)
+    data["Regional_connections"] = st.number_input("Connections", 0)
 
-bb = st.selectbox("Busbar",
-    [
-        "5 - No busbar / Single busbar ",
-        "4 - Single busbar with sectionaliser",
-        "3 - Single busbar with transfer",
-        "2 - Double busbar",
-        "1 - Double busbar with transfer / Triple busbar"
-    ]
-)
-data["Busbar_arrangement"] = int(bb[0])
+    bb = st.selectbox(
+        "Busbar",
+        [
+            "5 - No busbar / Single busbar ",
+            "4 - Single busbar with sectionaliser",
+            "3 - Single busbar with transfer",
+            "2 - Double busbar",
+            "1 - Double busbar with transfer / Triple busbar"
+        ]
+    )
+    data["Busbar_arrangement"] = int(bb[0])
 
-rd = st.selectbox("Redundancy",
-    [
-        "5 - No redundancy",
-        "3 - Disconnector bypass",
-        "1 - Redundancy"
-    ]
-)
-data["Breaker_redundancy"] = int(rd[0])
+    rd = st.selectbox(
+        "Redundancy",
+        [
+            "5 - No redundancy",
+            "3 - Disconnector bypass",
+            "1 - Redundancy"
+        ]
+    )
+    data["Breaker_redundancy"] = int(rd[0])
 
-    data["KILE_score_manual"] = st.number_input("KILE", 1,5)
-    data["Customer_impact_score_manual"] = st.number_input("Customer impact", 1,5)
+    data["KILE_score_manual"] = st.number_input("KILE", 1, 5)
+    data["Customer_impact_score_manual"] = st.number_input("Customer impact", 1, 5)
 
-    data["Feeder_critical_customer"] = st.selectbox("Critical feeder", ["No","Yes"])
+    data["Feeder_critical_customer"] = st.selectbox("Critical feeder", ["No", "Yes"])
 
     # FIXED TRANSFORMER LOGIC
     if data["Feeder_critical_customer"] == "Yes":
         data["Transformer_critical_customer"] = "No"
         data["Number_of_transformers"] = 0
-
     else:
-        data["Transformer_critical_customer"] = st.selectbox("Critical transformer", ["No","Yes"])
+        data["Transformer_critical_customer"] = st.selectbox("Critical transformer", ["No", "Yes"])
 
         if data["Transformer_critical_customer"] == "Yes":
             data["Number_of_transformers"] = st.number_input("Number of transformers", 1)
