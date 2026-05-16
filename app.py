@@ -501,7 +501,7 @@ if mode == "Evaluate SEVERAL circuit breakers":
 
     st.download_button(
         "Download Excel template",
-        template_df.to_csv(index=False),
+        template_df.to_csv(index=False, sep=";")
         file_name="breaker_template.csv",
         mime="text/csv"
     )
