@@ -139,6 +139,25 @@ def score_CI9(io, t):
     if t <= -15: return 2
     return 1
 
+def score_II10(v):
+    return int(v)
+
+def score_II11(n):
+    return 5 if n <= 1 else 4 if n == 2 else 3 if n == 3 else 2 if n == 4 else 1
+
+def score_II12(v):
+    return int(v)
+
+def score_II13(v):
+    return int(v)
+
+def score_II16(f, t, n):
+    if str(f).lower() == "yes":
+        return 5
+    if str(t).lower() == "yes":
+        return 5 if n == 1 else 3
+    return 1
+
 # --------------------------------------------------
 # CALCULATION
 # --------------------------------------------------
@@ -170,14 +189,21 @@ def calculate(df, ci_weights=None, ii_weights=None):
         df["CI"] = sum(df[c]*ci_weights[c] for c in ci_cols)
         df["CI_norm"] = df["CI"]/(5*sum(ci_weights.values()))
 
-    # II
-    df["II10"] = df["Breaker_function"]
-    df["II11"] = df["Regional_connections"]
-    df["II12"] = df["Busbar_arrangement"]
-    df["II13"] = df["Breaker_redundancy"]
-    df["II14"] = df["KILE_score_manual"]
-    df["II15"] = df["Customer_impact_score_manual"]
-    df["II16"] = df["Number_of_transformers"]
+# II (CORRECTED WITH SCORING)
+df["II10"] = df.apply(lambda r: score_II10(r.Breaker_function), axis=1)
+df["II11"] = df.apply(lambda r: score_II11(r.Regional_connections), axis=1)
+df["II12"] = df.apply(lambda r: score_II12(r.Busbar_arrangement), axis=1)
+df["II13"] = df.apply(lambda r: score_II13(r.Breaker_redundancy), axis=1)
+df["II14"] = df["KILE_score_manual"]
+df["II15"] = df["Customer_impact_score_manual"]
+df["II16"] = df.apply(
+    lambda r: score_II16(
+        r.Feeder_critical_customer,
+        r.Transformer_critical_customer,
+        r.Number_of_transformers
+    ),
+    axis=1
+)
 
     ii_cols = [f"II{i}" for i in range(10,17)]
 
@@ -318,7 +344,8 @@ if mode == "Evaluate ONE circuit breaker":
         st.dataframe(df)
         st.pyplot(plot_map(df))
 
-# --------------------------------------------------# ------------------------------------------------ BREAKERS (EXCEL)
+# --------------------------------------------------
+# BREAKERS (EXCEL)
 # --------------------------------------------------
 if mode == "Evaluate SEVERAL circuit breakers":
 
