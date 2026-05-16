@@ -271,6 +271,24 @@ def plot_map(df):
     return fig
 
 # --------------------------------------------------
+# COLOR FUNCTION (ADDED)
+# --------------------------------------------------
+def color_cells(val):
+
+    if val == 5:
+        return 'background-color: #FA0000'  # RED
+    elif val == 4:
+        return 'background-color: #FF9900'  # ORANGE
+    elif val == 3:
+        return 'background-color: #FFFF00'  # YELLOW
+    elif val == 2:
+        return 'background-color: #BEF01C'  # LIGHT GREEN
+    elif val == 1:
+        return 'background-color: #33CC33'  # GREEN
+    else:
+        return ''
+
+# --------------------------------------------------
 # SINGLE MODE (ONE BUTTON ONLY)
 # --------------------------------------------------
 if mode == "Evaluate ONE circuit breaker":
@@ -345,7 +363,20 @@ if mode == "Evaluate ONE circuit breaker":
         df = pd.DataFrame([data])
         df = calculate(df, ci_weights, ii_weights)
 
-        st.dataframe(df)
+# --------------------------------------------------
+# COLORED OUTPUT (ADDED)
+# --------------------------------------------------
+color_columns = [
+    "CI1","CI2","CI3","CI4","CI5","CI6","CI7","CI8","CI9",
+    "II10","II11","II12","II13","II14","II15","II16",
+    "Criticality_Score"
+]
+
+valid_cols = [col for col in color_columns if col in df.columns]
+
+styled_df = df.style.map(color_cells, subset=valid_cols)
+
+st.dataframe(styled_df)
 
         fig = plot_map(df)
         if fig:
