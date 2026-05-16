@@ -225,28 +225,29 @@ def calculate(df, ci_weights=None, ii_weights=None):
     )
 
 # -------------------------
-# RANKING (OPPDATERT)
+# RANKING
 # -------------------------
-    df["OR1"] = np.sqrt(
+    df["OR_Euclidean"] = np.sqrt(
         (df["CI_norm"] - 0.2)**2 +
         (df["II_norm"] - 0.2)**2
     )
 
-    df["OR2"] = df["CI_norm"] * df["II_norm"]
+    df["OR_CIxII"] = df["CI_norm"] * df["II_norm"]
 
-    df["Rank_OR1"] = (
-        df["OR1"]
+    df["Rank_Euclidean"] = (
+        df["OR_Euclidean"]
         .rank(ascending=False, method="min")
         .astype(int)
     )
 
-    df["Rank_OR2"] = (
-        df["OR2"]
+    df["Rank_CIxII"] = (
+        df["OR_CIxII"]
         .rank(ascending=False, method="min")
         .astype(int)
     )
 
     return df
+    
 # --------------------------------------------------
 # SAFE PLOT 
 # --------------------------------------------------
