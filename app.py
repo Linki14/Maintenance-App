@@ -248,10 +248,41 @@ else:
 
                     st.dataframe(df)
 
-                    # Plot
-                    fig, ax = plt.subplots()
-                    ax.scatter(df["II_norm"], df["CI_norm"])
-                    st.pyplot(fig)
+fig, ax = plt.subplots(figsize=(6,6))
+
+# BACKGROUND MATRIX
+matrix = np.array([
+    [1, 2, 3],
+    [2, 3, 4],
+    [3, 4, 5]
+])
+
+colors = [
+    "#33CC33", "#BEF01C", "#FFFF00",
+    "#BEF01C", "#FFFF00", "#FF9900",
+    "#FFFF00", "#FF9900", "#FA0000"
+]
+
+cmap = ListedColormap(colors)
+
+ax.imshow(matrix, cmap=cmap, extent=[0.2,1,0.2,1], origin="lower")
+
+# SCATTER POINTS
+ax.scatter(df["II_norm"], df["CI_norm"], color="black", s=50)
+
+# LABELS (Breaker names)
+if "Breaker_ID" in df.columns:
+    for _, row in df.iterrows():
+        ax.text(row["II_norm"], row["CI_norm"], str(row["Breaker_ID"]), fontsize=8)
+
+# AXIS LABELS
+ax.set_xlabel("Importance Index")
+ax.set_ylabel("Condition Index")
+
+ax.set_xlim(0.2, 1)
+ax.set_ylim(0.2, 1)
+
+st.pyplot(fig)
 
                     # Download
                     out = BytesIO()
