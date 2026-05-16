@@ -338,7 +338,7 @@ if mode == "Evaluate ONE circuit breaker":
         else:
             data["Number_of_transformers"] = 0
 
-    if st.button("Run Analysis"):
+    if st.button("Run Analysis", key="single_run"):
 
         df = pd.DataFrame([data])
         df = calculate(df, ci_weights, ii_weights)
@@ -403,7 +403,7 @@ if mode == "Evaluate SEVERAL circuit breakers":
         if missing:
             st.error(f"Missing columns: {missing}")
         else:
-            if st.button("Run Analysis (Multiple)"):
+            if st.button("Run Analysis (Multiple)", key="multi_run"):
 
                 try:
                     df = calculate(df, ci_weights, ii_weights)
