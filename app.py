@@ -15,7 +15,7 @@ mode = st.radio(
 )
 
 # --------------------------------------------------
-# WEIGHTING OPTIONS (UNCHANGED TEXT)
+# WEIGHTING OPTIONS
 # --------------------------------------------------
 st.subheader("Weighting")
 
@@ -93,7 +93,7 @@ if ii_use == "Yes":
             st.warning(f"Importance Index weights sum to {total_ii}%, not 100%")
 
 # --------------------------------------------------
-# SCORING FUNCTIONS (FIXED)
+# SCORING FUNCTIONS
 # --------------------------------------------------
 def score_interval_ratio(x):
     if x >= 1: return 5
@@ -130,7 +130,7 @@ def score_CI9(io, t):
     if t <= -15: return 2
     return 1
 
-# II scoring (MISSING BEFORE)
+# II scoring
 def score_II11(n):
     return 5 if n <= 1 else 4 if n == 2 else 3 if n == 3 else 2 if n == 4 else 1
 
@@ -142,15 +142,15 @@ def score_II16(f, t, n):
     return 1
 
 # --------------------------------------------------
-# CALCULATION (CORRECT VERSION)
+# CALCULATION
 # --------------------------------------------------
 def calculate(df, ci_weights=None, ii_weights=None):
 
     df = df.copy()
 
-    # -------------------------
-    # CI CALCULATION
-    # -------------------------
+# -------------------------
+# CI CALCULATION
+# -------------------------
     df["CI1"] = (df["Age_years"]/df["Expected_lifetime_years"]).apply(score_interval_ratio)
     df["CI2"] = (df["Num_operations"]/df["Max_operations"]).apply(score_interval_ratio)
     df["CI3"] = (df["Years_since_condition_assessment"]/df["Condition_assessment_interval"]).apply(score_interval_ratio)
@@ -170,9 +170,9 @@ def calculate(df, ci_weights=None, ii_weights=None):
         df["CI"] = sum(df[c]*ci_weights[c] for c in ci_cols)
         df["CI_norm"] = df["CI"]/(5*sum(ci_weights.values()))
 
-    # -------------------------
-    # II CALCULATION
-    # -------------------------
+# -------------------------
+# II CALCULATION
+# -------------------------
     df["II10"] = df["Breaker_function"]
     df["II11"] = df["Regional_connections"].apply(score_II11)
     df["II12"] = df["Busbar_arrangement"]
@@ -196,9 +196,9 @@ def calculate(df, ci_weights=None, ii_weights=None):
         df["II"] = sum(df[c]*ii_weights[c] for c in ii_cols)
         df["II_norm"] = df["II"]/(5*sum(ii_weights.values()))
 
-    # -------------------------
-    # CRITICALITY
-    # -------------------------
+# -------------------------
+# CRITICALITY
+# -------------------------
     CI_LOW_MAX = 0.4666
     CI_MID_MAX = 0.7332
 
@@ -224,9 +224,9 @@ def calculate(df, ci_weights=None, ii_weights=None):
         axis=1
     )
 
-    # -------------------------
-    # RANKING
-    # -------------------------
+# -------------------------
+# RANKING
+# -------------------------
     df["OR_Euclidean"] = np.sqrt(
         (df["CI_norm"] - 0.2)**2 +
         (df["II_norm"] - 0.2)**2
@@ -246,10 +246,10 @@ def calculate(df, ci_weights=None, ii_weights=None):
         .astype(int)
     )
 
-    # ✅ ONLY RETURN HERE
     return df
+    
 # --------------------------------------------------
-# SAFE PLOT (NO CRASH)
+# SAFE PLOT 
 # --------------------------------------------------
 def plot_map(df):
 
@@ -267,13 +267,10 @@ def plot_map(df):
 
     cmap = ListedColormap(colors)
 
-    # bakgrunn
     ax.imshow(matrix, cmap=cmap, extent=[0.2,1,0.2,1], origin="lower")
 
-    # punkter
     ax.scatter(df["II_norm"], df["CI_norm"], color="black", s=60)
 
-    # ✅ LEGG TIL DETTE (viser navn)
     for _, r in df.iterrows():
         ax.text(
             r["II_norm"],
@@ -284,7 +281,6 @@ def plot_map(df):
             va="bottom"
         )
 
-    # lås akser
     ax.set_xlim(0.2, 1)
     ax.set_ylim(0.2, 1)
 
@@ -294,7 +290,7 @@ def plot_map(df):
     return fig
 
 # --------------------------------------------------
-# COLOR FUNCTION (ADDED)
+# COLOR FUNCTION 
 # --------------------------------------------------
 def color_cells(val):
 
@@ -312,7 +308,7 @@ def color_cells(val):
         return ''
 
 # --------------------------------------------------
-# SINGLE MODE (ONE BUTTON ONLY)
+# SINGLE MODE
 # --------------------------------------------------
 if mode == "Evaluate ONE circuit breaker":
 
@@ -377,7 +373,7 @@ if mode == "Evaluate ONE circuit breaker":
         data["Distance_to_coast_km"] = 0
         data["Minimum_temperature_C"] = 0
 
-    # IMPORTANCE SUB-INDICES
+# IMPORTANCE SUB-INDICES
 
     bf = st.selectbox(
         "Breaker function (choose the highest applicable)",
@@ -450,9 +446,9 @@ if mode == "Evaluate ONE circuit breaker":
         df = pd.DataFrame([data])
         df = calculate(df, ci_weights, ii_weights)
         
-        # --------------------------------------------------
-        # COLORED + FORMATTED OUTPUT ✅
-        # --------------------------------------------------
+# --------------------------------------------------
+# COLORED AND FORMATTED OUTPUT 
+# --------------------------------------------------
         color_columns = [
             "CI1","CI2","CI3","CI4","CI5","CI6","CI7","CI8","CI9",
             "II10","II11","II12","II13","II14","II15","II16",
@@ -479,7 +475,7 @@ if mode == "Evaluate ONE circuit breaker":
             st.pyplot(fig)
 
 # --------------------------------------------------
-# MULTIPLE MODE (EXCEL WORKFLOW)
+# MULTIPLE MODE
 # --------------------------------------------------
 if mode == "Evaluate SEVERAL circuit breakers":
 
@@ -498,7 +494,7 @@ if mode == "Evaluate SEVERAL circuit breakers":
         "Number_of_transformers"
     ]
 
-    # ---- TEMPLATE DOWNLOAD ----
+    # TEMPLATE DOWNLOAD
     template_df = pd.DataFrame(columns=INPUT_COLUMNS)
 
     st.download_button(
@@ -508,12 +504,12 @@ if mode == "Evaluate SEVERAL circuit breakers":
         mime="text/csv"
     )
 
-    # ---- UPLOAD ----
+    # UPLOAD
     uploaded_file = st.file_uploader("Upload completed file", type=["csv","xlsx"])
 
     if uploaded_file:
 
-        # ✅ ROBUST CSV FIX
+
         if uploaded_file.name.endswith(".csv"):
 
             df = pd.read_csv(uploaded_file)
@@ -525,7 +521,6 @@ if mode == "Evaluate SEVERAL circuit breakers":
         else:
             df = pd.read_excel(uploaded_file)
 
-        # ✅ 🔥 VIKTIG: FIX INDOOR/OUTDOOR
         df["Indoor_outdoor"] = (
             df["Indoor_outdoor"]
             .astype(str)
@@ -533,7 +528,6 @@ if mode == "Evaluate SEVERAL circuit breakers":
             .str.lower()
         )
 
-        # ✅ FIX: ensure required columns exist
         required_columns = [
             "Feeder_critical_customer",
             "Transformer_critical_customer",
@@ -544,7 +538,6 @@ if mode == "Evaluate SEVERAL circuit breakers":
             if col not in df.columns:
                 df[col] = 0
 
-        # ✅ FIX: clean values
         df["Feeder_critical_customer"] = df["Feeder_critical_customer"].fillna("No")
         df["Transformer_critical_customer"] = df["Transformer_critical_customer"].fillna("No")
 
@@ -552,7 +545,6 @@ if mode == "Evaluate SEVERAL circuit breakers":
             df["Number_of_transformers"], errors="coerce"
         ).fillna(0)
 
-        # ✅ Convert numeric columns
         numeric_cols = df.columns.drop([
             "Breaker_ID",
             "Specialist_required",
@@ -565,7 +557,6 @@ if mode == "Evaluate SEVERAL circuit breakers":
         for col in numeric_cols:
             df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
-        # ✅ Optional warning
         missing = set(INPUT_COLUMNS) - set(df.columns)
         if missing:
             st.warning(f"Missing columns in file: {missing}")
@@ -574,7 +565,6 @@ if mode == "Evaluate SEVERAL circuit breakers":
 
             df = calculate(df, ci_weights, ii_weights)
 
-            # ---- COLOR + FORMAT ----
             color_columns = [
                 "CI1","CI2","CI3","CI4","CI5","CI6","CI7","CI8","CI9",
                 "II10","II11","II12","II13","II14","II15","II16",
