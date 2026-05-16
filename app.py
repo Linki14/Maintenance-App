@@ -295,36 +295,69 @@ if mode == "Evaluate ONE circuit breaker":
 
     data = {}
 
-    data["Breaker_ID"] = st.text_input("Breaker ID")
-    data["Age_years"] = st.number_input("Age", 0)
-    data["Expected_lifetime_years"] = st.number_input("Lifetime", 1)
+    data["Breaker_ID"] = st.text_input("Breaker ID or name")
 
-    data["Num_operations"] = st.number_input("Operations", 0)
-    data["Max_operations"] = st.number_input("Max operations", 1)
+    # CONDITION SUB-INDICES
+    data["Age_years"] = st.number_input("Age of the breaker (years)", 0)
+    data["Expected_lifetime_years"] = st.number_input("Expected lifetime (years)", 1)
 
-    data["Years_since_condition_assessment"] = st.number_input("Years since assessment", 0)
-    data["Condition_assessment_interval"] = st.number_input("Assessment interval", 1)
+    data["Num_operations"] = st.number_input("Total number of operations", 0)
+    data["Max_operations"] = st.number_input("Maximum allowed operations", 1)
 
-    data["Years_since_revision"] = st.number_input("Years since revision", 0)
-    data["Revision_interval"] = st.number_input("Revision interval", 1)
+    data["Years_since_condition_assessment"] = st.number_input(
+        "Years since last condition assessment", 0
+    )
+    data["Condition_assessment_interval"] = st.number_input(
+        "Condition assessment interval (years)", 1
+    )
 
-    data["Years_since_last_operation"] = st.number_input("Years since operation", 0)
+    data["Years_since_revision"] = st.number_input(
+        "Years since last revision", 0
+    )
+    data["Revision_interval"] = st.number_input(
+        "Revision interval (years)", 1
+    )
 
-    data["Specialist_required"] = st.selectbox("Specialist required", ["No","Yes"])
-    data["Outdated_equipment"] = st.selectbox("Outdated", ["No","Yes"])
+    data["Years_since_last_operation"] = st.number_input(
+        "Years since last operation (integer)", 0
+    )
 
-    io = st.selectbox("Indoor/Outdoor", ["Indoor","Outdoor"])
+    data["Specialist_required"] = st.selectbox(
+        "Does maintenance require external personnel? (Yes/No)",
+        ["No","Yes"]
+    )
+
+    data["Outdated_equipment"] = st.selectbox(
+        "Is the breaker outdated? (Yes/No)",
+        ["No","Yes"]
+    )
+
+    io = st.selectbox(
+        "Is the breaker indoor or outdoor? (Indoor/Outdoor)",
+        ["Indoor","Outdoor"]
+    )
     data["Indoor_outdoor"] = io
 
     if io == "Outdoor":
-        data["Distance_to_coast_km"] = st.number_input("Distance to coast", 0)
-        data["Minimum_temperature_C"] = st.number_input("Temperature", 0)
+        data["Distance_to_coast_km"] = st.number_input(
+            "Distance to coastline (km)", 0
+        )
+        data["Minimum_temperature_C"] = st.number_input(
+    "Minimum outdoor temperature during the year (°C)",
+        min_value=-100,
+        max_value=100,
+        value=0,
+        step=1
+    )
+
     else:
         data["Distance_to_coast_km"] = 0
         data["Minimum_temperature_C"] = 0
 
+    # IMPORTANCE SUB-INDICES
+
     bf = st.selectbox(
-        "Breaker function",
+        "Breaker function (choose the highest applicable)",
         [
             "5 - Connected to transmission grid",
             "4 - Connected to transformer",
@@ -335,26 +368,57 @@ if mode == "Evaluate ONE circuit breaker":
     )
     data["Breaker_function"] = int(bf[0])
 
-    data["Regional_connections"] = st.number_input("Connections", 0)
+    data["Regional_connections"] = st.number_input(
+        "Number of regional connections", 0
+    )
 
-    bb = st.selectbox("Busbar", ["5","4","3","2","1"])
+    bb = st.selectbox(
+        "Busbar arrangement",
+        [
+            "5 - No busbar / Single busbar",
+            "4 - Single busbar with sectionaliser",
+            "3 - Single busbar with transfer",
+            "2 - Double busbar",
+            "1 - Double busbar with transfer / Triple busbar"
+        ]
+    )
     data["Busbar_arrangement"] = int(bb[0])
 
-    rd = st.selectbox("Redundancy", ["5","3","1"])
+    rd = st.selectbox(
+        "Breaker redundancy",
+        [
+            "5 - No redundancy",
+            "3 - Disconnector bypass",
+            "1 - Redundancy"
+        ]
+    )
     data["Breaker_redundancy"] = int(rd[0])
 
-    data["KILE_score_manual"] = st.number_input("KILE", 1, 5)
-    data["Customer_impact_score_manual"] = st.number_input("Customer impact", 1, 5)
+    data["KILE_score_manual"] = st.number_input(
+        "KILE criticality (1–5)", 1, 5
+    )
+    data["Customer_impact_score_manual"] = st.number_input(
+        "Customer impact (1–5)", 1, 5
+    )
 
-    data["Feeder_critical_customer"] = st.selectbox("Critical feeder", ["No","Yes"])
+    data["Feeder_critical_customer"] = st.selectbox(
+        "On feeder of critical customer? (Yes/No)",
+        ["No","Yes"]
+    )
 
     if data["Feeder_critical_customer"] == "Yes":
         data["Transformer_critical_customer"] = "No"
         data["Number_of_transformers"] = 0
     else:
-        data["Transformer_critical_customer"] = st.selectbox("Critical transformer", ["No","Yes"])
+        data["Transformer_critical_customer"] = st.selectbox(
+            "Transformer breaker serving critical customer? (Yes/No)",
+            ["No","Yes"]
+        )
+
         if data["Transformer_critical_customer"] == "Yes":
-            data["Number_of_transformers"] = st.number_input("Number of transformers", 1)
+            data["Number_of_transformers"] = st.number_input(
+                "Number of transformers at substation", 1
+            )
         else:
             data["Number_of_transformers"] = 0
 
@@ -362,7 +426,7 @@ if mode == "Evaluate ONE circuit breaker":
 
         df = pd.DataFrame([data])
         df = calculate(df, ci_weights, ii_weights)
-
+        
         # --------------------------------------------------
         # COLORED + FORMATTED OUTPUT ✅
         # --------------------------------------------------
