@@ -1,95 +1,72 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 
 st.title("Maintenance Prioritization Tool")
 
-uploaded_file = st.file_uploader("Last opp Excel-fil", type=["xlsx"])
+# -------------------------
+# MODE SELECTION
+# -------------------------
+mode = st.radio(
+    "Velg analyse:",
+    ["Én bryter", "Flere brytere (Excel)"]
+)
 
 # -------------------------
-# CI FUNCTIONS
+# MODE 1: SINGLE BREAKER
 # -------------------------
+if mode == "Én bryter":
 
-def score_interval_ratio(x):
-    if x >= 1: return 5
-    if x >= 0.75: return 4
-    if x >= 0.5: return 3
-    if x >= 0.25: return 2
-    return 1
+    st.subheader("Input for én bryter")
 
-def score_yes_no(v):
-    return 5 if str(v).lower() == "yes" else 1
-
-def score_last_operation(y):
-    if y > 5: return 5
-    if y > 4: return 4
-    if y > 2: return 3
-    if y > 1: return 2
-    return 1
-
-# -------------------------
-# MAIN CALCULATION
-# -------------------------
-
-def calculate(df):
-
-    # CONDITION INDEX
-    df["CI1"] = (df["Age_years"] / df["Expected_lifetime_years"]).apply(score_interval_ratio)
-    df["CI2"] = (df["Num_operations"] / df["Max_operations"]).apply(score_interval_ratio)
-    df["CI3"] = (df["Years_since_condition_assessment"] / df["Condition_assessment_interval"]).apply(score_interval_ratio)
-    df["CI4"] = (df["Years_since_revision"] / df["Revision_interval"]).apply(score_interval_ratio)
-    df["CI5"] = df["Years_since_last_operation"].apply(score_last_operation)
-    df["CI6"] = df["Specialist_required"].apply(score_yes_no)
-    df["CI7"] = df["Outdated_equipment"].apply(score_yes_no)
-
-    ci_cols = ["CI1","CI2","CI3","CI4","CI5","CI6","CI7"]
-
-    df["CI"] = df[ci_cols].sum(axis=1)
-    df["CI_norm"] = df["CI"] / (5 * len(ci_cols))
-
-    # IMPORTANCE INDEX
-    df["II"] = df["KILE_score_manual"] + df["Customer_impact_score_manual"]
-    df["II_norm"] = df["II"] / 10
-
-    # CRITICALITY
-    df["Criticality_Score"] = df["CI_norm"] * df["II_norm"]
-
-    return df
-
-# -------------------------
-# APP FLOW
-# -------------------------
-
-if uploaded_file:
-
-    df = pd.read_excel(uploaded_file)
-
-    st.success("Fil lastet inn")
-    st.dataframe(df.head())
+    age = st.number_input("Age (years)")
+    lifetime = st.number_input("Expected lifetime")
+    operations = st.number_input("Number of operations")
+    max_operations = st.number_input("Max operations")
 
     if st.button("Kjør analyse"):
+        ci = age / lifetime if lifetime > 0 else 0
+        op = operations / max_operations if max_operations > 0 else 0
 
-        df = calculate(df)
+        result = ci + op
 
-        st.success("Analyse ferdig")
+        st.success("Analyse ferdig ✅")
+        st.write("Resultat:", result)
 
-        st.dataframe(df)
+# -------------------------
+# MODE 2: MULTIPLE BREAKERS
+# -------------------------
+else:
 
-        # Plot
-        fig, ax = plt.subplots()
-        ax.scatter(df["II_norm"], df["CI_norm"])
+    st.subheader("Flere brytere")
 
-        ax.set_xlabel("Importance Index")
-        ax.set_ylabel("Condition Index")
+    # 👉 KNAPP for å laste ned template
+    if st.button("Last ned Excel-mal"):
+        df_template = pd.DataFrame(columns=[
+            "Age_years",
+            "Expected_lifetime_years",
+            "Num_operations",
+            "Max_operations"
+        ])
 
-        st.pyplot(fig)
-
-        # Download
-        csv = df.to_csv(index=False).encode("utf-8")
+        csv = df_template.to_csv(index=False).encode("utf-8")
 
         st.download_button(
-            "Last ned resultat",
+            "Klikk for å laste ned",
             data=csv,
-            file_name="results.csv"
+            file_name="template.csv"
         )
+
+    # 👉 Upload etterpå
+    uploaded_file = st.file_uploader("Last opp ferdig Excel-fil", type=["xlsx"])
+
+    if uploaded_file:
+        df = pd.read_excel(uploaded_file)
+
+        st.write("Preview:")
+        st.dataframe(df.head())
+
+        if st.button("Kjør analyse"):
+            df["CI"] = df["Age_years"] / df["Expected_lifetime_years"]
+
+            st.success("Ferdig ✅")
+            st.dataframe(df)
